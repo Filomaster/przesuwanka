@@ -1,0 +1,63 @@
+// Variables
+$color_1: #ff7373;
+$color_2: #e0ff00;
+$background-color_1: #444;
+$background-color_2: #333;
+
+body {
+  background-color: $background-color_1;
+  padding: 0;
+  margin: 0;
+}
+
+#title {
+  background-color: $background-color_2;
+  font-family: "Patrick Hand", cursive;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  -webkit-box-shadow: 1px 5px 10px 0px rgba(10, 10, 10, 0.5);
+  -moz-box-shadow: 1px 5px 10px 0px rgba(10, 10, 10, 0.5);
+  box-shadow: 1px 5px 10px 0px rgba(10, 10, 10, 0.5);
+  & > h1 {
+    display: flex;
+    justify-content: center;
+    font-size: 4em;
+    margin: 0;
+    background: $color_1;
+    background: linear-gradient(0deg, $color_1 0%, $color_2 70%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+#container {
+  position: relative;
+}
+
+#controls > div {
+  display: flex;
+}
+
+.tile {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3em;
+  transition: 150ms; //TODO: Animacje mają być w JS :c
+  &:hover {
+    -webkit-filter: brightness(250%);
+  }
+}
+
+.hide-bcg {
+  opacity: 0;
+}
+
+// For mobile devices
+@media only screen and (max-width: 768px) {
+  #title > h1 {
+    font-size: 2em;
+  }
+}
