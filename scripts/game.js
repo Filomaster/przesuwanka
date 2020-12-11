@@ -1,6 +1,7 @@
 // Create game area
 
 const container = document.getElementById("container");
+const clock = document.getElementById("clock");
 let COUNT = 3; // Elements count (temp) - this should be dynamic
 const SIZE = 500; // Size of the container
 let TILE_SIZE = parseInt(SIZE / COUNT);
@@ -12,6 +13,20 @@ const images = [
   "../images/image_3.jpg",
   "../images/image_4.png",
   "../images/special.png",
+];
+
+const digits = [
+  "../images/digits/nixie_0.png",
+  "../images/digits/nixie_1.png",
+  "../images/digits/nixie_2.png",
+  "../images/digits/nixie_3.png",
+  "../images/digits/nixie_4.png",
+  "../images/digits/nixie_5.png",
+  "../images/digits/nixie_6.png",
+  "../images/digits/nixie_7.png",
+  "../images/digits/nixie_8.png",
+  "../images/digits/nixie_9.png",
+  "../images/digits/nixie_dot.png",
 ];
 
 const neighbors = [
@@ -26,6 +41,20 @@ let playerBoard = [];
 
 let preview = document.getElementById("preview");
 preview.style.cssText = `background-image: url(${images[imageIndex]}); background-size: 50px; height: 50px; width: 50px`;
+
+drawClock = (time) => {
+  // time format hh.mm.ss.mmm
+  for (let i = 0; i < time.length; i++) {
+    if (time[i] === ":") {
+      clock.children[i].style.backgroundImage = `url(${digits[10]})`;
+      continue;
+    }
+    console.log(clock.children[i]);
+    clock.children[i].style.backgroundImage = `url(${
+      digits[parseInt(time[i])]
+    })`;
+  }
+};
 
 createGameBoard = (size) => {
   let board = [];
@@ -84,6 +113,7 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// !Possible inside TILE object
 moveTile = (tile, board) => {
   let moved = checkMove(tile, board);
   if (moved != false) {
@@ -130,6 +160,7 @@ shuffle = (times) => {
 drawBoard = (board) => {
   for (let x = 0; x < board.length; x++) {
     for (let y = 0; y < board.length; y++) {
+      // ! Possible in TILE object
       let tile = document.createElement("div");
       let style = `
         height: ${TILE_SIZE}px;
@@ -198,13 +229,13 @@ function debugBoard(gameField) {
   console.log(`%c${print}`, "color : #b8ffe6");
 }
 
-main = () => {
+start = () => {
   container.innerHTML = "";
   TILE_SIZE = SIZE / COUNT;
   playerBoard = createGameBoard(COUNT);
-  debugBoard(playerBoard);
   drawBoard(playerBoard);
   shuffle(100);
+  drawClock("12:34:56:789");
 };
 
 // Buttons control
@@ -217,4 +248,4 @@ setImageIndex = (add = 1) => {
 };
 
 // Run our code
-main();
+start();

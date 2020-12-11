@@ -7,14 +7,11 @@
     <title>Document</title>
     <!-- Styles -->
     <link rel="stylesheet" href="style.css">
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 </head>
 
 <body>
     <div id="title">
-        <h1>Przesuwanka</h1>
+        <h1>Steins;<span class="inverted">G</span>ate</h1>
     </div>
     <div id="controls">
         <div id="imageSelect">
@@ -22,20 +19,33 @@
             <button onclick="setImageIndex(-1)">-</button>
             <div id="preview"></div>
             <button onclick="setImageIndex(1)">+</button>
-            <button onclick="main()">generate</button>
+            <button class="button" onclick="start()">Start</button>
         </div>
         <div id="sizeSelect">
-            <button onclick="COUNT = 3">3x3</button>
-            <button onclick="COUNT = 4">4x4</button>
-            <button onclick="COUNT = 5">5x5</button>
-            <button onclick="COUNT = 6">6x6</button>
+            <button onclick="prepare(3)">3x3</button>
+            <button onclick="prepare(4)">4x4</button>
+            <button onclick="prepare(5)">5x5</button>
+            <button onclick="prepare(6)">6x6</button>
         </div>
-        <div id="timer">00:00:00</div>
+        <div id="clock">
+            <p class="digit"></p>
+            <p class="digit"></p>
+            <p class="digit"></p>
+            <p class="digit"></p>
+            <p class="digit"></p>
+            <p class="digit"></p>
+            <p class="digit"></p>
+            <p class="digit"></p>
+            <p class="digit"></p>
+            <p class="digit"></p>
+            <p class="digit"></p>
+            <p class="digit"></p>
+        </div>
     </div>
     <div id="container" onselectstart="return false"></div>
     <!-- Scripts -->
-    <script src="../scripts/page_elements.js"></script>
     <script src="../scripts/game.js"></script>
+    <script src="../scripts/page_elements.js"></script>
 </body>
 
 </html>
