@@ -3,11 +3,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Special+Elite&display=swap");
 
 // Variables
-$background-color_1: #444;
-$background-color_2: #222;
+$backgroundColor: #222;
 
 body {
-  background-color: $background-color_1;
+  background-color: $backgroundColor;
   background: url("../images/background.jpg") no-repeat center center fixed;
   background-size: cover;
   padding: 0;
@@ -15,13 +14,13 @@ body {
 }
 
 #title {
-  background-color: $background-color_2;
+  background-color: $backgroundColor;
   font-family: "Cormorant Garamond", serif;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  box-shadow: 0px 5px 10px #000a, 0px 20px 20px #fff2 inset,
-    0px 20px 20px #0008 inset;
+  box-shadow: 0px 5px 10px #000a, 0px 20px 20px #0003 inset,
+    0px -20px 20px #0003 inset;
   // box-shadow: 0px 5px 10px 0px rgba(10, 10, 10, 0.5) inset;
   & > h1 {
     display: flex;
@@ -33,12 +32,8 @@ body {
     padding-top: 0.2em;
     padding-bottom: 0.2em;
 
-    // background: $color_1;
-    // background: linear-gradient(0deg, $color_1 0%, $color_2 70%);
-    // -webkit-background-clip: text;
-    // -webkit-text-fill-color: transparent;
     & > .inverted {
-      color: $background-color_2;
+      color: $backgroundColor;
       background-color: white;
       background-position: center;
       text-align: center;
@@ -51,10 +46,17 @@ body {
 
 #container {
   position: relative;
+  background-color: $backgroundColor;
+  box-shadow: 0px 0px 15px 2px #000a inset, 0px 0px 30px 10px #000a;
 }
 
 #controls > div {
   display: flex;
+  justify-content: center;
+}
+
+#slider {
+  height: 15vh;
 }
 
 .tile {
@@ -64,9 +66,9 @@ body {
   justify-content: center;
   font-size: 3em;
   transition: 150ms; //TODO: Animacje mają być w JS :c
-  &:hover {
-    -webkit-filter: brightness(250%);
-  }
+}
+.selectable:hover {
+  -webkit-filter: brightness(250%);
 }
 
 .hide-bcg {
@@ -79,7 +81,8 @@ body {
   background-size: 2em 3em;
 }
 
-.button {
+.ui {
+  // position: relative;
   font-family: "Special Elite", cursive;
   font-size: 2em;
   background: transparent;
@@ -87,10 +90,72 @@ body {
   border: #ff9100 solid 3px;
   border-radius: 2px;
   &:hover {
+    color: #ffde4b;
+    border: #ffde4b solid 3px;
     text-shadow: 0 0 15px #ff3c00, 0 0 2px #ffde4b;
     box-shadow: 0 0 15px #ff3c00, 0 0 2px #ffde4b, 0 0 15px #ff3c00 inset,
       0 0 2px #ffde4b inset;
   }
+  width: 5em;
+  // & select {
+  //   display: none;
+  // }
+}
+
+// .select-selected:after {
+//   position: absolute;
+//   content: "";
+//   top: 14px;
+//   right: 10px;
+//   width: 0;
+//   height: 0;
+//   border: 6px solid transparent;
+//   border-color: #ff9100 transparent transparent transparent;
+// }
+// .select-selected.select-arrow-active:after {
+//   border-color: transparent transparent #ff9100 transparent;
+//   top: 7px;
+// }
+
+// .select-items div,
+// .select-selected {
+//   color: #ffffff;
+//   padding: 8px 16px;
+//   border: 1px solid transparent;
+//   border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
+//   cursor: pointer;
+// }
+// .select-items {
+//   position: absolute;
+//   background-color: DodgerBlue;
+//   top: 100%;
+//   left: 0;
+//   right: 0;
+//   z-index: 99;
+// }
+
+// /* Hide the items when the select box is closed: */
+// .select-hide {
+//   display: none;
+// }
+
+// .select-items div:hover,
+// .same-as-selected {
+//   background-color: rgba(0, 0, 0, 0.1);
+// }
+
+.content {
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  justify-self: center;
+  justify-items: center;
+}
+
+#clock {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 1vh;
 }
 
 // For mobile devices

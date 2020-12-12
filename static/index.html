@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Steins;Gate</title>
     <!-- Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
@@ -13,36 +13,27 @@
     <div id="title">
         <h1>Steins;<span class="inverted">G</span>ate</h1>
     </div>
+    <div id="slider"></div>
+    <div id="clock"></div>
+    <div class="content">
+        <div id="container" onselectstart="return false"></div>
+    </div>
     <div id="controls">
         <div id="imageSelect">
-
             <button onclick="setImageIndex(-1)">-</button>
             <div id="preview"></div>
             <button onclick="setImageIndex(1)">+</button>
-            <button class="button" onclick="start()">Start</button>
+            <button class="ui" onclick="start()">Start</button>
         </div>
-        <div id="sizeSelect">
-            <button onclick="prepare(3)">3x3</button>
-            <button onclick="prepare(4)">4x4</button>
-            <button onclick="prepare(5)">5x5</button>
-            <button onclick="prepare(6)">6x6</button>
-        </div>
-        <div id="clock">
-            <p class="digit"></p>
-            <p class="digit"></p>
-            <p class="digit"></p>
-            <p class="digit"></p>
-            <p class="digit"></p>
-            <p class="digit"></p>
-            <p class="digit"></p>
-            <p class="digit"></p>
-            <p class="digit"></p>
-            <p class="digit"></p>
-            <p class="digit"></p>
-            <p class="digit"></p>
+        <div>
+            <select class="ui" name="size" id="sizeSelect" onchange="COUNT=this.value; drawScene()">
+                <option value="3">3x3</option>
+                <option value="4">4x4</option>
+                <option value="5">5x5</option>
+                <option value="6">6x6</option>
+            </select>
         </div>
     </div>
-    <div id="container" onselectstart="return false"></div>
     <!-- Scripts -->
     <script src="../scripts/game.js"></script>
     <script src="../scripts/page_elements.js"></script>

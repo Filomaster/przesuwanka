@@ -3,18 +3,19 @@
 const container = document.getElementById("container");
 const clock = document.getElementById("clock");
 let COUNT = 3; // Elements count (temp) - this should be dynamic
-const SIZE = 500; // Size of the container
+let SIZE = 500; // Size of the container
 let TILE_SIZE = parseInt(SIZE / COUNT);
-const IS_DEV = true;
-
+const IS_DEV = false;
+let timer, mix;
+let startTime, currentTime;
+// Images for game
 const images = [
-  "../images/image_1.png",
-  "../images/image_2.png",
-  "../images/image_3.jpg",
-  "../images/image_4.png",
-  "../images/special.png",
+  "../images/playable/image_1.jpg",
+  "../images/playable/image_2.jpg",
+  "../images/playable/image_3.jpg",
 ];
 
+// Timer digits
 const digits = [
   "../images/digits/nixie_0.png",
   "../images/digits/nixie_1.png",
@@ -30,10 +31,10 @@ const digits = [
 ];
 
 const neighbors = [
-  [0, 1, "right"],
-  [0, -1, "left"],
-  [1, 0, "top"],
-  [-1, 0, "bottom"],
+  [0, 1],
+  [0, -1],
+  [1, 0],
+  [-1, 0],
 ];
 
 let imageIndex = 0;
@@ -41,6 +42,26 @@ let playerBoard = [];
 
 let preview = document.getElementById("preview");
 preview.style.cssText = `background-image: url(${images[imageIndex]}); background-size: 50px; height: 50px; width: 50px`;
+container.style.cssText = `width: ${SIZE}px; height: ${SIZE}px`;
+
+initClock = () => {
+  for (let i = 0; i < 12; i++) {
+    let digit = document.createElement("p");
+    digit.className = "digit";
+    clock.appendChild(digit);
+  }
+};
+
+formatTime = (time) => {
+  date = new Date(time);
+  return `${date.getHours() - 1 < 10 ? "0" : ""}${date.getHours() - 1}:${
+    date.getMinutes() < 10 ? "0" : ""
+  }${date.getMinutes()}:${
+    date.getSeconds() < 10 ? "0" : ""
+  }${date.getSeconds()}:${
+    date.getMilliseconds() < 10 ? "00" : date.getMilliseconds() < 100 ? "0" : ""
+  }${date.getMilliseconds()}`;
+};
 
 drawClock = (time) => {
   // time format hh.mm.ss.mmm
@@ -49,7 +70,6 @@ drawClock = (time) => {
       clock.children[i].style.backgroundImage = `url(${digits[10]})`;
       continue;
     }
-    console.log(clock.children[i]);
     clock.children[i].style.backgroundImage = `url(${
       digits[parseInt(time[i])]
     })`;
@@ -99,7 +119,6 @@ checkMove = (tile, board) => {
     if (
       safeBoard[y + 1 + neighbors[i][0]][x + 1 + neighbors[i][1]] === "empty"
     ) {
-      //   console.log(neighbors[i][2]);
       return { x: x + neighbors[i][1], y: y + neighbors[i][0] };
     }
   }
@@ -144,17 +163,18 @@ moveTile = (tile, board) => {
 };
 
 shuffle = (times) => {
-  // Maybe Set interval?
-  let timeout = 250;
-  for (let i = 0; i < getRandomInt(times, 10 * times); i++) {
-    setTimeout(() => {
+  return new Promise((res, rej) => {
+    let repeat = getRandomInt(10, 50);
+    mix = setInterval(() => {
       container.childNodes.forEach((tile) => {
-        setTimeout(() => {
-          moveTile(tile, playerBoard);
-        }, timeout);
+        moveTile(tile, playerBoard);
       });
-    }, timeout);
-  }
+      repeat--;
+      if (repeat == 0) {
+        clearInterval(mix), res();
+      }
+    }, 5);
+  });
 };
 
 drawBoard = (board) => {
@@ -174,6 +194,7 @@ drawBoard = (board) => {
 
     `;
       tile.classList.add("tile");
+      tile.classList.add("selectable");
       tile.innerHTML = IS_DEV && board[y][x] != "empty" ? board[y][x] + 1 : "";
       if (board[x][y] == "empty") {
         tile.classList.add("hide-bcg");
@@ -197,11 +218,12 @@ drawBoard = (board) => {
             let finishedTile = element.cloneNode(true);
             finishedTile.style.scale = "100%";
             finishedTile.innerHTML = "";
+            finishedTile.classList.remove("selectable");
             finishedTile.classList.remove("hide-bcg");
-            console.log(this.parentElement);
             element.parentElement.replaceChild(finishedTile, element);
           });
-          alert("U won");
+          clearInterval(timer);
+          alert(currentTime + "\nU won");
         }
       });
       container.appendChild(tile);
@@ -209,6 +231,7 @@ drawBoard = (board) => {
   }
 };
 
+// Debugging function. Prints whole table to console in readable way
 function debugBoard(gameField) {
   let print = "";
   for (let i = 0; i < gameField.length; i++) {
@@ -229,13 +252,29 @@ function debugBoard(gameField) {
   console.log(`%c${print}`, "color : #b8ffe6");
 }
 
+initClock();
 start = () => {
+  if (timer) clearInterval(timer);
   container.innerHTML = "";
   TILE_SIZE = SIZE / COUNT;
   playerBoard = createGameBoard(COUNT);
   drawBoard(playerBoard);
-  shuffle(100);
-  drawClock("12:34:56:789");
+  shuffle(100).then(() => {
+    startTime = new Date();
+    timer = setInterval(() => {
+      currentTime = formatTime(Date.now() - startTime.getTime());
+      drawClock(currentTime);
+    }, 1);
+  });
+};
+
+let drawScene = () => {
+  clearInterval(timer);
+  clearInterval(mix);
+  container.innerHTML = "";
+  drawClock("00:00:00:000");
+  TILE_SIZE = SIZE / COUNT;
+  drawBoard(createGameBoard(COUNT));
 };
 
 // Buttons control
@@ -245,7 +284,9 @@ setImageIndex = (add = 1) => {
   if (imageIndex > images.length - 1) imageIndex = 0;
   console.log(imageIndex);
   preview.style.backgroundImage = `url(${images[imageIndex]})`;
+
+  drawScene();
 };
 
 // Run our code
-start();
+drawScene();
