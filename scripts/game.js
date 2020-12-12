@@ -164,20 +164,26 @@ moveTile = (tile, board) => {
 
 shuffle = (times) => {
   return new Promise((res, rej) => {
-    let repeat = getRandomInt(10, 50);
-    mix = setInterval(() => {
+    shuffleInterval = (count, timeout) => {
       container.childNodes.forEach((tile) => {
         moveTile(tile, playerBoard);
       });
-      repeat--;
-      if (repeat == 0) {
-        clearInterval(mix), res();
+      if (count <= 0) {
+        setTimeout(res, 250);
+        return;
       }
-    }, 5);
+      count--;
+      if (timeout > 15) timeout -= 15;
+      setTimeout(() => {
+        shuffleInterval(count, timeout);
+      }, timeout);
+    };
+    let repeat = getRandomInt(15, 75);
+    shuffleInterval(repeat, 250);
   });
 };
 
-drawBoard = (board) => {
+drawBoard = (board, readOnly = false) => {
   for (let x = 0; x < board.length; x++) {
     for (let y = 0; y < board.length; y++) {
       // ! Possible in TILE object
@@ -222,13 +228,26 @@ drawBoard = (board) => {
             finishedTile.classList.remove("hide-bcg");
             element.parentElement.replaceChild(finishedTile, element);
           });
+
           clearInterval(timer);
           alert(currentTime + "\nU won");
         }
       });
+
       container.appendChild(tile);
     }
   }
+};
+
+drawBoardReadonly = () => {
+  container.childNodes.forEach((element) => {
+    let finishedTile = element.cloneNode(true);
+    finishedTile.style.scale = "100%";
+    finishedTile.innerHTML = "";
+    finishedTile.classList.remove("selectable");
+    finishedTile.classList.remove("hide-bcg");
+    element.parentElement.replaceChild(finishedTile, element);
+  });
 };
 
 // Debugging function. Prints whole table to console in readable way
@@ -254,6 +273,7 @@ function debugBoard(gameField) {
 
 initClock();
 start = () => {
+  drawClock("00:00:00:000");
   if (timer) clearInterval(timer);
   container.innerHTML = "";
   TILE_SIZE = SIZE / COUNT;
@@ -274,7 +294,8 @@ let drawScene = () => {
   container.innerHTML = "";
   drawClock("00:00:00:000");
   TILE_SIZE = SIZE / COUNT;
-  drawBoard(createGameBoard(COUNT));
+  drawBoard(createGameBoard(COUNT), true);
+  drawBoardReadonly();
 };
 
 // Buttons control
