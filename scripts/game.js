@@ -12,7 +12,7 @@ let TILE_SIZE = parseInt(SIZE / COUNT);
 const IS_DEV = false;
 let timer, mix;
 let startTime, currentTime;
-let victoryWindow;
+let victoryWindow, scoreWindow;
 // Images for game
 const images = [
   "../images/playable/image_1.jpg",
@@ -37,14 +37,49 @@ const digits = [
 
 const places = ["st", "nd", "rd", "th"];
 const neighbors = [
-  [0, 1],
-  [0, -1],
-  [1, 0],
-  [-1, 0],
+  [0, 1, "right"],
+  [0, -1, "left"],
+  [1, 0, "top"],
+  [-1, 0, "bottom"],
 ];
+
+//#region Cookies
+// Jako że pierwszy raz robię z ciasteczkami, musiałem porzyczyć nieco kodu
+createCookie = (name, value, days) => {
+  let expires;
+  let date = new Date();
+  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+  expires = "; expires=" + date.toGMTString();
+  document.cookie = name + "=" + value + expires + "; path=/";
+};
 
 let leaderboard = {
   scores: [],
+
+  saveScore: function () {
+    let output = "";
+    this.scores.forEach((score) => {
+      output += `${score.map}${score.mode}${score.place - 1}${score.nick}${
+        score.score
+      }&`;
+    });
+    createCookie("save", output, 365);
+  },
+
+  loadScore: function () {
+    let save = document.cookie.replace("save=", "").split("&");
+    let loadedScores = [];
+    save.forEach((data) => {
+      loadedScores.push({
+        map: parseInt(data[0]),
+        mode: parseInt(data[1]),
+        place: parseInt(data[2]) + 1,
+        nick: data.substr(3, 3),
+        score: data.substr(6),
+      });
+    });
+    leaderboard.scores = loadedScores;
+  },
   getScores: function (index, mode) {
     return this.scores
       .filter((x) => x.map == index && x.mode == mode)
@@ -86,26 +121,30 @@ let leaderboard = {
       }
       // console.log(mapScores, leaderboardStartIndex);
       this.scores.splice(leaderboardStartIndex, 10, ...mapScores);
+      this.saveScore();
       console.log(this.getScores(imageIndex, COUNT));
     }
   },
 
   initScores: function () {
-    if (this.scores.length == 0) {
-      images.forEach((image, index) => {
-        for (let i = 3; i <= 6; i++) {
-          for (let j = 1; j <= 10; j++) {
-            this.scores.push({
-              map: index,
-              mode: i,
-              place: j,
-              nick: "---",
-              score: "99:99:99:999",
-            });
-          }
+    let newScores = [];
+    images.forEach((image, index) => {
+      for (let i = 3; i <= 6; i++) {
+        for (let j = 1; j <= 10; j++) {
+          newScores.push({
+            map: index,
+            mode: i,
+            place: j,
+            nick: "---",
+            score: "99:99:99:999",
+          });
         }
-      });
-    }
+      }
+    });
+    console.log(newScores == leaderboard.scores);
+    leaderboard.scores = newScores;
+    console.log(newScores == leaderboard.scores);
+    console.log(leaderboard.scores);
   },
 };
 
@@ -172,7 +211,7 @@ initSlider = (slides) => {
   images.forEach((image) => {
     slide = document.createElement("span");
     slide.style.cssText = `background-image: url(${image})`;
-    slide.classList.add("slide");
+    slide.style.slide.classList.add("slide");
     slides.appendChild(slide);
   });
 };
@@ -198,6 +237,29 @@ formatTime = (time) => {
   }${date.getSeconds()}:${
     date.getMilliseconds() < 10 ? "00" : date.getMilliseconds() < 100 ? "0" : ""
   }${date.getMilliseconds()}`;
+};
+
+drawLeaderboard = () => {
+  let mode = COUNT;
+  let map = imageIndex;
+
+  scoreWindow = new customWindow(50, 70);
+  let content = document.createElement("div");
+  let scores = leaderboard.getScores(map, mode);
+  let table = "";
+  scores.forEach((score, i) => {
+    table += `<tr ${i % 2 == 0 ? `class="even"` : ""}><td style="width: 20%" >${
+      score.place
+    }</td><td style="width: 40%" >${score.nick.toUpperCase()}</td><td style="width: 40%" >${
+      score.score == "99:99:99:999" ? "--:--:--:---" : score.score
+    }</td></tr>`;
+  });
+  content.className = "windowWrapper";
+  content.innerHTML = `<h1>leaderboard;</h1>
+        <h2> image: ${map + 1}  |  difficulty: ${mode}x${mode}</h2>
+        <table style="width: 100%" ><tr><th style="width: 20%" >id:</th><th style="width: 40%" >name:</th><th style="width: 40%" >time:</th></tr>${table}</table>
+        <button onclick="scoreWindow.deleteWindow()">Ok</button>`;
+  scoreWindow.drawWindow(content);
 };
 
 drawClock = (time) => {
@@ -254,7 +316,11 @@ checkMove = (tile, board) => {
     if (
       safeBoard[y + 1 + neighbors[i][0]][x + 1 + neighbors[i][1]] === "empty"
     ) {
-      return { x: x + neighbors[i][1], y: y + neighbors[i][0] };
+      return {
+        x: x + neighbors[i][1],
+        y: y + neighbors[i][0],
+        direction: neighbors[i][2],
+      };
     }
   }
   return false;
@@ -283,7 +349,98 @@ moveTile = (tile, board) => {
         sibling.dataset.y = tile.dataset.y;
         tile.dataset.x = moved.x;
         tile.dataset.y = moved.y;
-        //   Change style
+        // let animate = () => {
+        //   return new Promise((res) => {
+        //     let animationSettings = { duration: 50, fill: "forwards" };
+        //     switch (moved.direction) {
+        //       case "right":
+        //         tile.animate(
+        //           [
+        //             { transform: "translateX(0)" },
+        //             { transform: `translateX(${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         sibling.animate(
+        //           [
+        //             { transform: "translateX(0)" },
+        //             { transform: `translateX(-${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         break;
+        //       case "left":
+        //         tile.animate(
+        //           [
+        //             { transform: "translateX(0)" },
+        //             { transform: `translateX(-${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         sibling.animate(
+        //           [
+        //             { transform: "translateX(0)" },
+        //             { transform: `translateX(${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         break;
+        //       case "left":
+        //         tile.animate(
+        //           [
+        //             { transform: "translateX(0)" },
+        //             { transform: `translateX(-${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         sibling.animate(
+        //           [
+        //             { transform: "translateX(0)" },
+        //             { transform: `translateX(${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         break;
+        //       case "bottom":
+        //         tile.animate(
+        //           [
+        //             { transform: "translateY(0)" },
+        //             { transform: `translateY(-${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         sibling.animate(
+        //           [
+        //             { transform: "translateY(0)" },
+        //             { transform: `translateY(${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         break;
+        //       case "top":
+        //         tile.animate(
+        //           [
+        //             { transform: "translateY(0)" },
+        //             { transform: `translateY(${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         sibling.animate(
+        //           [
+        //             { transform: "translateY(0)" },
+        //             { transform: `translateY(-${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         break;
+        //       //   sibling.animate([
+        //       //     {transform: 'translateY()'}
+        //       //   ])
+        //     }
+        //     setTimeout(res, animationSettings.duration);
+        //   });
+        // };
+        // animate().then(() => {
         sibling.style.left =
           sibling.dataset.x * TILE_SIZE /*+ sibling.dataset.x */ + "px";
         sibling.style.top =
@@ -292,6 +449,8 @@ moveTile = (tile, board) => {
           tile.dataset.x * TILE_SIZE /*+ tile.dataset.x */ + "px";
         tile.style.top =
           tile.dataset.y * TILE_SIZE /*+ tile.dataset.y */ + "px";
+        // });
+        // Change style
       }
     });
   }
@@ -381,7 +540,7 @@ drawBoard = (board, readOnly = false) => {
                 } best time! Enter your nickname to save it to leaderboard</p>
                 <p>MAX 3 LETTERS</p>
                 <input name="nick" id="nick" minlength="3" maxlength="3">
-                <button onclick="if(document.getElementById('nick').value.length == 3){leaderboard.addScores(document.getElementById('nick').value, currentTime); victoryWindow.deleteWindow()}">Ok</button>`
+                <button onclick="if(document.getElementById('nick').value.length == 3){leaderboard.addScores(document.getElementById('nick').value, currentTime); victoryWindow.deleteWindow(); drawLeaderboard();}">Ok</button>`
               : `<button onclick="victoryWindow.deleteWindow()">Ok</button>`
           }`;
           victoryWindow.drawWindow(message);
@@ -403,27 +562,6 @@ drawBoardReadonly = () => {
     element.parentElement.replaceChild(finishedTile, element);
   });
 };
-
-// Debugging function. Prints whole table to console in readable way
-function debugBoard(gameField) {
-  let print = "";
-  for (let i = 0; i < gameField.length; i++) {
-    for (let j = 0; j < gameField.length; j++) {
-      print +=
-        (gameField[i][j].toString().length == 1 || gameField[i][j] == "empty"
-          ? " "
-          : "") +
-        (parseInt(gameField[i][j]) || gameField[i][j] == 0
-          ? gameField[i][j] + 1
-          : gameField[i][j] == "empty"
-          ? "E"
-          : gameField[i][j]) +
-        " ";
-    }
-    print += "\n";
-  }
-  console.log(`%c${print}`, "color : #b8ffe6");
-}
 
 initClock();
 start = () => {
@@ -464,5 +602,9 @@ setImageIndex = (add = 1) => {
 };
 
 // Run our code,
-leaderboard.initScores();
+if (document.cookie.length == 0) leaderboard.initScores();
+else leaderboard.loadScore();
+// drawLeaderboard();
+
+// console.log(leaderboard.loadScore());
 drawScene();
