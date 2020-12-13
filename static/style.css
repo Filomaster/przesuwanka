@@ -130,6 +130,33 @@ body {
   justify-items: center;
 }
 
+.wrapper {
+  overflow: hidden;
+  position: relative;
+  width: 15vh;
+  height: 15vh;
+  background-color: #222;
+  z-index: 1;
+}
+
+.slides {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+  top: 0;
+  left: -15vh;
+  width: 100000px;
+}
+
+.control {
+  position: absolute;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  background: #fff;
+}
+
 #clock {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -138,6 +165,131 @@ body {
       -ms-flex-pack: center;
           justify-content: center;
   padding-bottom: 1vh;
+}
+
+.screenBcg {
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(#ad6200bb, #000), repeating-linear-gradient(0deg, #ff910040, #0004, #0004, #ff910040 1vh);
+  -webkit-backdrop-filter: blur(5px);
+          backdrop-filter: blur(5px);
+  top: 0;
+  left: 0;
+  position: absolute;
+  z-index: 3;
+}
+
+.customWindow {
+  color: #ff9100;
+  font-family: "Special Elite", cursive;
+  position: relative;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  border: #ffab4b solid 3px;
+  text-shadow: 0 0 20px #ff3c00, 0 0 2px #ffde4b;
+  -webkit-box-shadow: 0 0 20px #ff3c00, 0 0 2px #ffde4b, 0 0 15px #ff3c00 inset, 0 0 2px #ffde4b inset;
+          box-shadow: 0 0 20px #ff3c00, 0 0 2px #ffde4b, 0 0 15px #ff3c00 inset, 0 0 2px #ffde4b inset;
+}
+
+.customWindow > .windowWrapper {
+  width: inherit;
+  height: inherit;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+.customWindow > .windowWrapper > h1 {
+  color: #ffde4b;
+  font-size: 4em;
+  text-align: center;
+  margin: 0;
+  margin-top: 1em;
+}
+
+.customWindow > .windowWrapper > p {
+  font-size: 2em;
+  text-align: center;
+}
+
+.customWindow > .windowWrapper > input {
+  -ms-flex-item-align: center;
+      -ms-grid-row-align: center;
+      align-self: center;
+  text-align: center;
+  margin-bottom: 1em;
+  font-size: 2em;
+  width: 4em;
+  height: 2.5em;
+  font-family: "Special Elite", cursive;
+  background: transparent;
+  color: #ff9100;
+  border: #ffab4b solid 3px;
+  text-shadow: 0 0 20px #ff3c00, 0 0 2px #ffde4b;
+  -webkit-box-shadow: 0 0 20px #ff3c00, 0 0 2px #ffde4b, 0 0 15px #ff3c00 inset, 0 0 2px #ffde4b inset;
+          box-shadow: 0 0 20px #ff3c00, 0 0 2px #ffde4b, 0 0 15px #ff3c00 inset, 0 0 2px #ffde4b inset;
+}
+
+.customWindow > .windowWrapper > input:focus {
+  color: #ffde4b;
+  border-color: #ffde4b;
+  text-shadow: 0 0 30px #ff3c00, 0 0 2px #ffde4b;
+  -webkit-box-shadow: 0 0 35px #ff3c00, 0 0 4px #ffde4b, 0 0 35px #ff3c00 inset, 0 0 4px #ffde4b inset;
+          box-shadow: 0 0 35px #ff3c00, 0 0 4px #ffde4b, 0 0 35px #ff3c00 inset, 0 0 4px #ffde4b inset;
+}
+
+.customWindow > .windowWrapper > button {
+  -ms-flex-item-align: center;
+      -ms-grid-row-align: center;
+      align-self: center;
+  margin-bottom: 1em;
+  font-size: 2em;
+  width: 4em;
+  height: 2em;
+  font-family: "Special Elite", cursive;
+  background: transparent;
+  color: #ff9100;
+  border: #ffab4b solid 3px;
+  text-shadow: 0 0 20px #ff3c00, 0 0 2px #ffde4b;
+  -webkit-box-shadow: 0 0 20px #ff3c00, 0 0 2px #ffde4b, 0 0 15px #ff3c00 inset, 0 0 2px #ffde4b inset;
+          box-shadow: 0 0 20px #ff3c00, 0 0 2px #ffde4b, 0 0 15px #ff3c00 inset, 0 0 2px #ffde4b inset;
+}
+
+.customWindow > .windowWrapper > button:hover {
+  color: #ffde4b;
+  border-color: #ffde4b;
+  text-shadow: 0 0 30px #ff3c00, 0 0 2px #ffde4b;
+  -webkit-box-shadow: 0 0 35px #ff3c00, 0 0 4px #ffde4b, 0 0 35px #ff3c00 inset, 0 0 4px #ffde4b inset;
+          box-shadow: 0 0 35px #ff3c00, 0 0 4px #ffde4b, 0 0 35px #ff3c00 inset, 0 0 4px #ffde4b inset;
+  cursor: pointer;
+}
+
+.customWindow > a {
+  position: absolute;
+  font-size: 2.5em;
+  right: 0.5em;
+  top: 0.5em;
+}
+
+.customWindow > a:hover {
+  color: #ffde4b;
+  text-shadow: 0 0 10px #ff3c00, 0 0 2px #ffde4b;
+  cursor: pointer;
 }
 
 @media only screen and (max-width: 768px) {

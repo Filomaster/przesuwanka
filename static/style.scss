@@ -152,10 +152,136 @@ body {
   justify-items: center;
 }
 
+.wrapper {
+  overflow: hidden;
+  position: relative;
+  width: 15vh;
+  height: 15vh;
+  background-color: #222;
+  z-index: 1;
+}
+
+.slides {
+  display: flex;
+  position: relative;
+  top: 0;
+  left: -15vh;
+  width: 100000px;
+}
+
+.control {
+  position: absolute;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  background: #fff;
+}
+
 #clock {
   display: flex;
   justify-content: center;
   padding-bottom: 1vh;
+}
+.screenBcg {
+  width: 100vw;
+  height: 100vh;
+
+  background: radial-gradient(#ad6200bb, #000),
+    repeating-linear-gradient(0deg, #ff910040, #0004, #0004, #ff910040 1vh);
+
+  backdrop-filter: blur(5px);
+  top: 0;
+  left: 0;
+  position: absolute;
+  z-index: 3;
+}
+
+.customWindow {
+  color: #ff9100;
+  font-family: "Special Elite", cursive;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: #ffab4b solid 3px;
+  text-shadow: 0 0 20px #ff3c00, 0 0 2px #ffde4b;
+  box-shadow: 0 0 20px #ff3c00, 0 0 2px #ffde4b, 0 0 15px #ff3c00 inset,
+    0 0 2px #ffde4b inset;
+  & > .windowWrapper {
+    width: inherit;
+    height: inherit;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    & > h1 {
+      color: #ffde4b;
+      font-size: 4em;
+      text-align: center;
+      margin: 0;
+      margin-top: 1em;
+    }
+    & > p {
+      font-size: 2em;
+      text-align: center;
+    }
+    & > input {
+      align-self: center;
+      text-align: center;
+      margin-bottom: 1em;
+      font-size: 2em;
+      width: 4em;
+      height: 2.5em;
+      font-family: "Special Elite", cursive;
+      background: transparent;
+      color: #ff9100;
+      border: #ffab4b solid 3px;
+      text-shadow: 0 0 20px #ff3c00, 0 0 2px #ffde4b;
+      box-shadow: 0 0 20px #ff3c00, 0 0 2px #ffde4b, 0 0 15px #ff3c00 inset,
+        0 0 2px #ffde4b inset;
+
+      &:focus {
+        color: #ffde4b;
+        border-color: #ffde4b;
+        text-shadow: 0 0 30px #ff3c00, 0 0 2px #ffde4b;
+        box-shadow: 0 0 35px #ff3c00, 0 0 4px #ffde4b, 0 0 35px #ff3c00 inset,
+          0 0 4px #ffde4b inset;
+      }
+    }
+    & > button {
+      align-self: center;
+      margin-bottom: 1em;
+      font-size: 2em;
+      width: 4em;
+      height: 2em;
+      font-family: "Special Elite", cursive;
+      background: transparent;
+      color: #ff9100;
+      border: #ffab4b solid 3px;
+      text-shadow: 0 0 20px #ff3c00, 0 0 2px #ffde4b;
+      box-shadow: 0 0 20px #ff3c00, 0 0 2px #ffde4b, 0 0 15px #ff3c00 inset,
+        0 0 2px #ffde4b inset;
+      &:hover {
+        color: #ffde4b;
+        border-color: #ffde4b;
+        text-shadow: 0 0 30px #ff3c00, 0 0 2px #ffde4b;
+        box-shadow: 0 0 35px #ff3c00, 0 0 4px #ffde4b, 0 0 35px #ff3c00 inset,
+          0 0 4px #ffde4b inset;
+        cursor: pointer;
+      }
+    }
+  }
+  & > a {
+    position: absolute;
+    font-size: 2.5em;
+    right: 0.5em;
+    top: 0.5em;
+    &:hover {
+      color: #ffde4b;
+      text-shadow: 0 0 10px #ff3c00, 0 0 2px #ffde4b;
+      cursor: pointer;
+    }
+  }
 }
 
 // For mobile devices

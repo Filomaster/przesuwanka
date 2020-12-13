@@ -13,30 +13,37 @@
     <div id="title">
         <h1>Steins;<span class="inverted">G</span>ate</h1>
     </div>
-    <div id="slider"></div>
-    <div id="clock"></div>
-    <div class="content">
-        <div id="container" onselectstart="return false"></div>
-    </div>
-    <div id="controls">
-        <div id="imageSelect">
-            <button onclick="setImageIndex(-1)">-</button>
-            <div id="preview"></div>
-            <button onclick="setImageIndex(1)">+</button>
-            <button class="ui" onclick="start()">Start</button>
+    <div id="app">
+        <!-- <div id="slider" class="slider">
+            <div class="wrapper">
+                <div id="slides" class="slides"></div>
+            </div>
+            <a id="prev" class="control prev"></a>
+            <a id="next" class="control next"></a>
+        </div> -->
+        <div id="clock"></div>
+        <div class="content">
+            <div id="container" onselectstart="return false"></div>
         </div>
-        <div>
-            <select class="ui" name="size" id="sizeSelect" onchange="COUNT=this.value; drawScene()">
-                <option value="3">3x3</option>
-                <option value="4">4x4</option>
-                <option value="5">5x5</option>
-                <option value="6">6x6</option>
-            </select>
+        <div id="controls">
+            <div id="imageSelect">
+                <button onclick="setImageIndex(-1)">-</button>
+                <div id="preview"></div>
+                <button onclick="setImageIndex(1)">+</button>
+                <button class="ui" onclick="start()">Start</button>
+            </div>
+            <div>
+                <select class="ui" name="size" id="sizeSelect" onchange="COUNT=this.value; drawScene()">
+                    <option value="3">3x3</option>
+                    <option value="4">4x4</option>
+                    <option value="5">5x5</option>
+                    <option value="6">6x6</option>
+                </select>
+            </div>
         </div>
     </div>
     <!-- Scripts -->
     <script src="../scripts/game.js"></script>
-    <script src="../scripts/page_elements.js"></script>
 </body>
 
 </html>
