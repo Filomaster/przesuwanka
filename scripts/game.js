@@ -1,19 +1,41 @@
-// Create game area
-
+// DOM elements
 const container = document.getElementById("container");
-let COUNT = 3; // Elements count (temp) - this should be dynamic
-const SIZE = 500; // Size of the container
-let TILE_SIZE = parseInt(SIZE / COUNT);
-const IS_DEV = true;
+const clock = document.getElementById("clock");
+const slider = document.getElementById("slider");
+const slides = document.getElementById("slides");
+const app = document.getElementById("app");
 
+// Variables
+let COUNT = 3; // Elements count (temp) - this should be dynamic
+let SIZE = 400; // Size of the container
+let TILE_SIZE = parseInt(SIZE / COUNT);
+const IS_DEV = false;
+let timer, mix;
+let startTime, currentTime;
+let victoryWindow, scoreWindow;
+// Images for game
 const images = [
-  "../images/image_1.png",
-  "../images/image_2.png",
-  "../images/image_3.jpg",
-  "../images/image_4.png",
-  "../images/special.png",
+  "../images/playable/image_1.jpg",
+  "../images/playable/image_2.jpg",
+  "../images/playable/image_3.jpg",
 ];
 
+// Timer digits
+const digits = [
+  "../images/digits/nixie_0.png",
+  "../images/digits/nixie_1.png",
+  "../images/digits/nixie_2.png",
+  "../images/digits/nixie_3.png",
+  "../images/digits/nixie_4.png",
+  "../images/digits/nixie_5.png",
+  "../images/digits/nixie_6.png",
+  "../images/digits/nixie_7.png",
+  "../images/digits/nixie_8.png",
+  "../images/digits/nixie_9.png",
+  "../images/digits/nixie_dot.png",
+];
+
+const places = ["st", "nd", "rd", "th"];
 const neighbors = [
   [0, 1, "right"],
   [0, -1, "left"],
@@ -21,11 +43,237 @@ const neighbors = [
   [-1, 0, "bottom"],
 ];
 
+//#region Cookies
+// Jako że pierwszy raz robię z ciasteczkami, musiałem porzyczyć nieco kodu
+createCookie = (name, value, days) => {
+  let expires;
+  let date = new Date();
+  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+  expires = "; expires=" + date.toGMTString();
+  document.cookie = name + "=" + value + expires + "; path=/";
+};
+
+let leaderboard = {
+  scores: [],
+
+  saveScore: function () {
+    let output = "";
+    this.scores.forEach((score) => {
+      output += `${score.map}${score.mode}${score.place - 1}${score.nick}${
+        score.score
+      }&`;
+    });
+    createCookie("save", output, 365);
+  },
+
+  loadScore: function () {
+    let save = document.cookie.replace("save=", "").split("&");
+    let loadedScores = [];
+    save.forEach((data) => {
+      loadedScores.push({
+        map: parseInt(data[0]),
+        mode: parseInt(data[1]),
+        place: parseInt(data[2]) + 1,
+        nick: data.substr(3, 3),
+        score: data.substr(6),
+      });
+    });
+    leaderboard.scores = loadedScores;
+  },
+  getScores: function (index, mode) {
+    return this.scores
+      .filter((x) => x.map == index && x.mode == mode)
+      .sort(
+        (a, b) =>
+          parseInt(a.score.replace(":", "")) -
+          parseInt(b.score.replace(":", ""))
+      );
+  },
+  checkScore: function (score) {
+    let mapScores = this.getScores(imageIndex, COUNT);
+    for (let i = 0; i < mapScores.length; i++) {
+      if (
+        parseInt(score.replaceAll(":", "")) <
+        parseInt(mapScores[i].score.replaceAll(":", ""))
+      ) {
+        return i;
+      }
+    }
+    return null;
+  },
+  addScores: function (nick, time) {
+    let mapScores = this.getScores(imageIndex, COUNT);
+    let leaderboardStartIndex = this.scores.indexOf(mapScores[0]);
+    console.log(leaderboardStartIndex);
+    if (this.checkScore(time) != null) {
+      let index = this.checkScore(time);
+      mapScores.splice(index, 0, {
+        map: imageIndex,
+        mode: COUNT,
+        place: index + 1,
+        nick: nick,
+        score: time,
+      });
+      // console.log(mapScores)
+      mapScores.pop();
+      for (let i = 0; i < 10; i++) {
+        mapScores[i].place = i + 1;
+      }
+      // console.log(mapScores, leaderboardStartIndex);
+      this.scores.splice(leaderboardStartIndex, 10, ...mapScores);
+      this.saveScore();
+      console.log(this.getScores(imageIndex, COUNT));
+    }
+  },
+
+  initScores: function () {
+    let newScores = [];
+    images.forEach((image, index) => {
+      for (let i = 3; i <= 6; i++) {
+        for (let j = 1; j <= 10; j++) {
+          newScores.push({
+            map: index,
+            mode: i,
+            place: j,
+            nick: "---",
+            score: "99:99:99:999",
+          });
+        }
+      }
+    });
+    console.log(newScores == leaderboard.scores);
+    leaderboard.scores = newScores;
+    console.log(newScores == leaderboard.scores);
+    console.log(leaderboard.scores);
+  },
+};
+
 let imageIndex = 0;
 let playerBoard = [];
 
+class customWindow {
+  constructor(width, height, fullHeight = false) {
+    this.width = width;
+    this.height = height;
+    this.fullHeight = fullHeight;
+  }
+
+  drawWindow(content) {
+    if (window.innerWidth < 1000) {
+      this.width = 2 * this.width;
+    }
+    if (window.innerWidth < 768) {
+      this.width = 100;
+      if (this.fullHeight) this.height = 100;
+    }
+    console.log("TEST");
+    let customBcg = document.createElement("div");
+    customBcg.className = "screenBcg";
+    let customWindow = document.createElement("div");
+    customWindow.className = "customWindow";
+    customWindow.style.width = this.width + "vw";
+    customWindow.style.height = this.height + "vh";
+    customWindow.style.top =
+      parseInt(this.fullHeight ? 0 : 50 - this.height / 2) + "vh";
+    customWindow.style.left =
+      parseInt(this.width > 100 ? 0 : 50 - this.width / 2) + "vw";
+    let button = document.createElement("a");
+    button.innerText = "X";
+    button.addEventListener("click", function () {
+      customBcg.parentElement.removeChild(customBcg);
+    });
+    // TODO
+
+    customWindow.appendChild(button);
+    customWindow.appendChild(content);
+    customBcg.appendChild(customWindow);
+    this.mainWindow = customBcg;
+    app.appendChild(customBcg);
+  }
+  deleteWindow() {
+    this.mainWindow.parentElement.removeChild(this.mainWindow);
+  }
+}
+
 let preview = document.getElementById("preview");
 preview.style.cssText = `background-image: url(${images[imageIndex]}); background-size: 50px; height: 50px; width: 50px`;
+container.style.cssText = `width: ${SIZE}px; height: ${SIZE}px`;
+
+initClock = () => {
+  for (let i = 0; i < 12; i++) {
+    let digit = document.createElement("p");
+    digit.className = "digit";
+    clock.appendChild(digit);
+  }
+};
+
+initSlider = (slides) => {
+  images.forEach((image) => {
+    slide = document.createElement("span");
+    slide.style.cssText = `background-image: url(${image})`;
+    slide.style.slide.classList.add("slide");
+    slides.appendChild(slide);
+  });
+};
+
+// initSlider(slides);
+
+// let x = document.createElement("div");
+// let testWindow = new customWindow(40, 65);
+// x.className = "windowWrapper";
+// x.innerHTML = `<h1>You won!</h1><p>Your time: 00:00:00:000</p>
+//               <p>You got 2nd best time! Enter your nickname to save it to leaderboard</p>
+//               <p>MAX 3 LETTERS</p>
+//               <input name="nick" id="nick">
+//               <button onclick="testWindow.deleteWindow(); ">Ok</button>`;
+// testWindow.drawWindow(x);
+
+formatTime = (time) => {
+  date = new Date(time);
+  return `${date.getHours() - 1 < 10 ? "0" : ""}${date.getHours() - 1}:${
+    date.getMinutes() < 10 ? "0" : ""
+  }${date.getMinutes()}:${
+    date.getSeconds() < 10 ? "0" : ""
+  }${date.getSeconds()}:${
+    date.getMilliseconds() < 10 ? "00" : date.getMilliseconds() < 100 ? "0" : ""
+  }${date.getMilliseconds()}`;
+};
+
+drawLeaderboard = () => {
+  let mode = COUNT;
+  let map = imageIndex;
+
+  scoreWindow = new customWindow(50, 70);
+  let content = document.createElement("div");
+  let scores = leaderboard.getScores(map, mode);
+  let table = "";
+  scores.forEach((score, i) => {
+    table += `<tr ${i % 2 == 0 ? `class="even"` : ""}><td style="width: 20%" >${
+      score.place
+    }</td><td style="width: 40%" >${score.nick.toUpperCase()}</td><td style="width: 40%" >${
+      score.score == "99:99:99:999" ? "--:--:--:---" : score.score
+    }</td></tr>`;
+  });
+  content.className = "windowWrapper";
+  content.innerHTML = `<h1>leaderboard;</h1>
+        <h2> image: ${map + 1}  |  difficulty: ${mode}x${mode}</h2>
+        <table style="width: 100%" ><tr><th style="width: 20%" >id:</th><th style="width: 40%" >name:</th><th style="width: 40%" >time:</th></tr>${table}</table>
+        <button onclick="scoreWindow.deleteWindow()">Ok</button>`;
+  scoreWindow.drawWindow(content);
+};
+
+drawClock = (time) => {
+  // time format hh.mm.ss.mmm
+  for (let i = 0; i < time.length; i++) {
+    if (time[i] === ":") {
+      clock.children[i].style.backgroundImage = `url(${digits[10]})`;
+      continue;
+    }
+    clock.children[i].style.backgroundImage = `url(${
+      digits[parseInt(time[i])]
+    })`;
+  }
+};
 
 createGameBoard = (size) => {
   let board = [];
@@ -43,14 +291,12 @@ createGameBoard = (size) => {
 
 checkOrder = (board) => {
   let numbers = [].concat(...board);
-  numbers.pop(0); // TODO: Nie zostawiaj 'pop' bo nie zadziała kiedy empty nie jest na końcu... Znaczy teoretycznie zadziała ale nie jak powinno
-  for (let i = 0; i < numbers.length - 1; i++) {
+  for (let i = 0; i < numbers.length - 2; i++) {
     if (numbers[i] + 1 != numbers[i + 1]) return false;
   }
   return true;
 };
 
-// TODO: Check if tile is near empty
 checkMove = (tile, board) => {
   let x = parseInt(tile.dataset.x);
   let y = parseInt(tile.dataset.y);
@@ -70,8 +316,11 @@ checkMove = (tile, board) => {
     if (
       safeBoard[y + 1 + neighbors[i][0]][x + 1 + neighbors[i][1]] === "empty"
     ) {
-      //   console.log(neighbors[i][2]);
-      return { x: x + neighbors[i][1], y: y + neighbors[i][0] };
+      return {
+        x: x + neighbors[i][1],
+        y: y + neighbors[i][0],
+        direction: neighbors[i][2],
+      };
     }
   }
   return false;
@@ -84,6 +333,7 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// !Possible inside TILE object
 moveTile = (tile, board) => {
   let moved = checkMove(tile, board);
   if (moved != false) {
@@ -99,7 +349,98 @@ moveTile = (tile, board) => {
         sibling.dataset.y = tile.dataset.y;
         tile.dataset.x = moved.x;
         tile.dataset.y = moved.y;
-        //   Change style
+        // let animate = () => {
+        //   return new Promise((res) => {
+        //     let animationSettings = { duration: 50, fill: "forwards" };
+        //     switch (moved.direction) {
+        //       case "right":
+        //         tile.animate(
+        //           [
+        //             { transform: "translateX(0)" },
+        //             { transform: `translateX(${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         sibling.animate(
+        //           [
+        //             { transform: "translateX(0)" },
+        //             { transform: `translateX(-${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         break;
+        //       case "left":
+        //         tile.animate(
+        //           [
+        //             { transform: "translateX(0)" },
+        //             { transform: `translateX(-${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         sibling.animate(
+        //           [
+        //             { transform: "translateX(0)" },
+        //             { transform: `translateX(${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         break;
+        //       case "left":
+        //         tile.animate(
+        //           [
+        //             { transform: "translateX(0)" },
+        //             { transform: `translateX(-${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         sibling.animate(
+        //           [
+        //             { transform: "translateX(0)" },
+        //             { transform: `translateX(${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         break;
+        //       case "bottom":
+        //         tile.animate(
+        //           [
+        //             { transform: "translateY(0)" },
+        //             { transform: `translateY(-${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         sibling.animate(
+        //           [
+        //             { transform: "translateY(0)" },
+        //             { transform: `translateY(${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         break;
+        //       case "top":
+        //         tile.animate(
+        //           [
+        //             { transform: "translateY(0)" },
+        //             { transform: `translateY(${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         sibling.animate(
+        //           [
+        //             { transform: "translateY(0)" },
+        //             { transform: `translateY(-${parseInt(TILE_SIZE)}px)` },
+        //           ],
+        //           animationSettings
+        //         );
+        //         break;
+        //       //   sibling.animate([
+        //       //     {transform: 'translateY()'}
+        //       //   ])
+        //     }
+        //     setTimeout(res, animationSettings.duration);
+        //   });
+        // };
+        // animate().then(() => {
         sibling.style.left =
           sibling.dataset.x * TILE_SIZE /*+ sibling.dataset.x */ + "px";
         sibling.style.top =
@@ -108,28 +449,41 @@ moveTile = (tile, board) => {
           tile.dataset.x * TILE_SIZE /*+ tile.dataset.x */ + "px";
         tile.style.top =
           tile.dataset.y * TILE_SIZE /*+ tile.dataset.y */ + "px";
+        // });
+        // Change style
       }
     });
   }
 };
 
 shuffle = (times) => {
-  // Maybe Set interval?
-  let timeout = 250;
-  for (let i = 0; i < getRandomInt(times, 10 * times); i++) {
+  return new Promise((res, rej) => {
     setTimeout(() => {
-      container.childNodes.forEach((tile) => {
-        setTimeout(() => {
+      shuffleInterval = (count, timeout) => {
+        container.childNodes.forEach((tile) => {
           moveTile(tile, playerBoard);
+        });
+        if (count <= 0) {
+          setTimeout(res, 500);
+          return;
+        }
+        count--;
+        if (timeout > 40) timeout -= 20;
+
+        setTimeout(() => {
+          shuffleInterval(count, timeout);
         }, timeout);
-      });
-    }, timeout);
-  }
+      };
+      let repeat = getRandomInt(10, 100);
+      shuffleInterval(repeat, 250);
+    }, 500);
+  });
 };
 
-drawBoard = (board) => {
+drawBoard = (board, readOnly = false) => {
   for (let x = 0; x < board.length; x++) {
     for (let y = 0; y < board.length; y++) {
+      // ! Possible in TILE object
       let tile = document.createElement("div");
       let style = `
         height: ${TILE_SIZE}px;
@@ -143,6 +497,7 @@ drawBoard = (board) => {
 
     `;
       tile.classList.add("tile");
+      tile.classList.add("selectable");
       tile.innerHTML = IS_DEV && board[y][x] != "empty" ? board[y][x] + 1 : "";
       if (board[x][y] == "empty") {
         tile.classList.add("hide-bcg");
@@ -166,45 +521,73 @@ drawBoard = (board) => {
             let finishedTile = element.cloneNode(true);
             finishedTile.style.scale = "100%";
             finishedTile.innerHTML = "";
+            finishedTile.classList.remove("selectable");
             finishedTile.classList.remove("hide-bcg");
-            console.log(this.parentElement);
             element.parentElement.replaceChild(finishedTile, element);
           });
-          alert("U won");
+
+          clearInterval(timer);
+          let message = document.createElement("div");
+          let place = leaderboard.checkScore(currentTime);
+          victoryWindow =
+            place != null ? new customWindow(40, 65) : new customWindow(40, 30);
+
+          message.className = "windowWrapper";
+          message.innerHTML = `<h1>You won!</h1><p>Your time: ${currentTime}</p> ${
+            place != null
+              ? `<p>You got ${
+                  place + 1 + places[place < 3 ? place : 3]
+                } best time! Enter your nickname to save it to leaderboard</p>
+                <p>MAX 3 LETTERS</p>
+                <input name="nick" id="nick" minlength="3" maxlength="3">
+                <button onclick="if(document.getElementById('nick').value.length == 3){leaderboard.addScores(document.getElementById('nick').value, currentTime); victoryWindow.deleteWindow(); drawLeaderboard();}">Ok</button>`
+              : `<button onclick="victoryWindow.deleteWindow()">Ok</button>`
+          }`;
+          victoryWindow.drawWindow(message);
         }
       });
+
       container.appendChild(tile);
     }
   }
 };
 
-function debugBoard(gameField) {
-  let print = "";
-  for (let i = 0; i < gameField.length; i++) {
-    for (let j = 0; j < gameField.length; j++) {
-      print +=
-        (gameField[i][j].toString().length == 1 || gameField[i][j] == "empty"
-          ? " "
-          : "") +
-        (parseInt(gameField[i][j]) || gameField[i][j] == 0
-          ? gameField[i][j] + 1
-          : gameField[i][j] == "empty"
-          ? "E"
-          : gameField[i][j]) +
-        " ";
-    }
-    print += "\n";
-  }
-  console.log(`%c${print}`, "color : #b8ffe6");
-}
+drawBoardReadonly = () => {
+  container.childNodes.forEach((element) => {
+    let finishedTile = element.cloneNode(true);
+    finishedTile.style.scale = "100%";
+    finishedTile.innerHTML = "";
+    finishedTile.classList.remove("selectable");
+    finishedTile.classList.remove("hide-bcg");
+    element.parentElement.replaceChild(finishedTile, element);
+  });
+};
 
-main = () => {
+initClock();
+start = () => {
+  drawClock("00:00:00:000");
+  if (timer) clearInterval(timer);
   container.innerHTML = "";
   TILE_SIZE = SIZE / COUNT;
   playerBoard = createGameBoard(COUNT);
-  debugBoard(playerBoard);
   drawBoard(playerBoard);
-  shuffle(100);
+  shuffle(100).then(() => {
+    startTime = new Date();
+    timer = setInterval(() => {
+      currentTime = formatTime(Date.now() - startTime.getTime());
+      drawClock(currentTime);
+    }, 1);
+  });
+};
+
+let drawScene = () => {
+  clearInterval(timer);
+  clearInterval(mix);
+  container.innerHTML = "";
+  drawClock("00:00:00:000");
+  TILE_SIZE = SIZE / COUNT;
+  drawBoard(createGameBoard(COUNT), true);
+  drawBoardReadonly();
 };
 
 // Buttons control
@@ -214,7 +597,14 @@ setImageIndex = (add = 1) => {
   if (imageIndex > images.length - 1) imageIndex = 0;
   console.log(imageIndex);
   preview.style.backgroundImage = `url(${images[imageIndex]})`;
+
+  drawScene();
 };
 
-// Run our code
-main();
+// Run our code,
+if (document.cookie.length == 0) leaderboard.initScores();
+else leaderboard.loadScore();
+// drawLeaderboard();
+
+// console.log(leaderboard.loadScore());
+drawScene();

@@ -4,37 +4,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Steins;Gate</title>
     <!-- Styles -->
     <link rel="stylesheet" href="style.css">
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 </head>
 
 <body>
     <div id="title">
-        <h1>Przesuwanka</h1>
+        <h1>Steins;<span class="inverted">G</span>ate</h1>
     </div>
-    <div id="controls">
-        <div id="imageSelect">
-
-            <button onclick="setImageIndex(-1)">-</button>
-            <div id="preview"></div>
-            <button onclick="setImageIndex(1)">+</button>
-            <button onclick="main()">generate</button>
+    <div id="app">
+        <!-- <div id="slider" class="slider">
+            <div class="wrapper">
+                <div id="slides" class="slides"></div>
+            </div>
+            <a id="prev" class="control prev"></a>
+            <a id="next" class="control next"></a>
+        </div> -->
+        <div id="clock"></div>
+        <div class="content">
+            <div id="container" onselectstart="return false"></div>
         </div>
-        <div id="sizeSelect">
-            <button onclick="COUNT = 3">3x3</button>
-            <button onclick="COUNT = 4">4x4</button>
-            <button onclick="COUNT = 5">5x5</button>
-            <button onclick="COUNT = 6">6x6</button>
+        <div id="controls">
+            <div id="imageSelect">
+                <button onclick="setImageIndex(-1)">-</button>
+                <div id="preview"></div>
+                <button onclick="setImageIndex(1)">+</button>
+                <button class="ui" onclick="start()">Start</button>
+            </div>
+            <div>
+                <select class="ui" name="size" id="sizeSelect" onchange="COUNT=this.value; drawScene()">
+                    <option value="3">3x3</option>
+                    <option value="4">4x4</option>
+                    <option value="5">5x5</option>
+                    <option value="6">6x6</option>
+                </select>
+            </div>
         </div>
-        <div id="timer">00:00:00</div>
     </div>
-    <div id="container" onselectstart="return false"></div>
     <!-- Scripts -->
-    <script src="../scripts/page_elements.js"></script>
     <script src="../scripts/game.js"></script>
 </body>
 
